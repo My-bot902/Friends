@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Sangat</title>
+
+  <!-- Tailwind CSS v4 (browser build) -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    html { scroll-padding-top: 5rem; }              /* keeps sections clear of the sticky navbar */
+    body { background:#0f0f0f; font-family:'Inter',system-ui,sans-serif; }
+    .font-display { font-family:'Space Grotesk','Inter',sans-serif; }
+
+    /* Brand gradient (purple -> pink -> cyan) */
+    .grad-text { background:linear-gradient(90deg,#a855f7,#ec4899,#22d3ee); -webkit-background-clip:text; background-clip:text; color:transparent; }
+    .grad-bg   { background:linear-gradient(90deg,#a855f7,#ec4899,#22d3ee); }
+
+    /* Glass card */
+    .glass { background:rgba(255,255,255,.04); backdrop-filter:blur(14px); border:1px solid rgba(255,255,255,.1); }
+
+    /* Scroll reveal (toggled by IntersectionObserver) */
+    .reveal { opacity:0; transform:translateY(28px) scale(.98); transition:opacity .7s ease, transform .7s ease; }
+    .reveal.in { opacity:1; transform:none; }
+    .reveal.d1 { transition-delay:.12s } .reveal.d2 { transition-delay:.24s }
+
+    /* Photo frame: glowing gradient border + 3D tilt */
+    .tilt { transform-style:preserve-3d; transition:transform .15s ease-out; will-change:transform; }
+    .frame { position:relative; padding:3px; border-radius:1.5rem; background:linear-gradient(135deg,var(--a),var(--b)); box-shadow:0 0 40px -8px var(--a); transition:box-shadow .3s; }
+    .frame:hover { box-shadow:0 0 60px -4px var(--b); }
+    .frame .ph { overflow:hidden; border-radius:1.35rem; aspect-ratio:4/5; background:#171717; }
+    .frame img { width:100%; height:100%; object-fit:cover; transition:transform .6s ease; }
+    .frame:hover img { transform:scale(1.07); }
+
+    /* Typewriter cursor */
+    .cursor { display:inline-block; width:3px; height:1em; margin-left:3px; vertical-align:-.12em; background:var(--b); animation:blink 1s steps(1) infinite; }
+    @keyframes blink { 50% { opacity:0 } }
+
+    /* Hero entrance + floating blobs */
+    @keyframes rise { from { opacity:0; transform:translateY(24px) } to { opacity:1; transform:none } }
+    .rise { animation:rise .9s cubic-bezier(.2,.7,.2,1) both; }
+    @keyframes float { 50% { transform:translateY(-24px) } }
+    .blob { position:absolute; border-radius:9999px; filter:blur(90px); opacity:.35; animation:float 9s ease-in-out infinite; }
+
+    @media (prefers-reduced-motion:reduce) {
+      .reveal { opacity:1; transform:none; transition:none }
+      .rise, .blob, .cursor { animation:none }
+    }
+  </style>
+</head>
+
+<body class="text-neutral-200 antialiased bg-neutral-950">
+
+  <!-- ================= NAVBAR + SCROLL PROGRESS ================= -->
+  <header class="fixed inset-x-0 top-0 z-50 backdrop-blur-md bg-neutral-950/70 border-b border-white/10">
+    <nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
+      <a href="#top" class="font-display text-lg font-bold grad-text">Sangat</a>
+
+      <!-- Desktop friend links (filled by JS) -->
+      <ul id="navLinks" class="hidden md:flex items-center gap-1"></ul>
+
+      <!-- Hamburger (mobile) -->
+      <button id="menuBtn" aria-label="Toggle menu" aria-expanded="false"
+              class="md:hidden grid h-10 w-10 place-items-center rounded-lg border border-white/10 hover:bg-white/10">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path id="icoOpen" d="M4 7h16M4 12h16M4 17h16"/><path id="icoClose" class="hidden" d="M6 6l12 12M18 6L6 18"/>
+        </svg>
+      </button>
+    </nav>
+
+    <!-- Mobile dropdown -->
+    <ul id="mobileMenu" class="md:hidden hidden flex-col gap-1 border-t border-white/10 px-4 py-3"></ul>
+
+    <!-- Scroll progress line: grows 0% -> 100% -->
+    <div class="absolute inset-x-0 bottom-0 h-1 bg-white/5">
+      <div id="progress" class="h-1 w-0 grad-bg shadow-[0_0_12px_2px_rgba(236,72,153,.7)]"></div>
+    </div>
+  </header>
+
+  <!-- ================= HERO ================= -->
+  <section id="top" class="relative flex min-h-screen items-center justify-center overflow-hidden px-6 pt-20 text-center">
+    <div class="blob -left-20 top-24 h-72 w-72 bg-purple-600"></div>
+    <div class="blob -right-16 bottom-24 h-72 w-72 bg-cyan-500" style="animation-delay:-4s"></div>
+    <div class="blob left-1/3 top-1/2 h-60 w-60 bg-pink-600" style="animation-delay:-2s"></div>
+
+    <div class="relative max-w-3xl">
+      <p class="rise glass mx-auto mb-6 w-fit rounded-full px-4 py-1.5 text-sm text-neutral-300">Est. forever. No refunds.</p>
+      <h1 class="rise font-display text-5xl font-bold leading-[1.05] sm:text-7xl md:text-8xl" style="animation-delay:.15s">
+        The <span class="grad-text">Sangat</span>
+      </h1>
+      <p class="rise mx-auto mt-6 max-w-xl text-lg text-neutral-400 sm:text-xl" style="animation-delay:.3s">
+        Legends never die. They just stop replying in the group chat.
+      </p>
+      <a href="#" id="heroBtn"
+         class="rise grad-bg mt-10 inline-block rounded-full px-8 py-3.5 font-medium text-white shadow-lg shadow-purple-500/30 transition hover:scale-105 hover:shadow-pink-500/40"
+         style="animation-delay:.45s">Meet the Sangat</a>
+    </div>
+  </section>
+
+  <!-- ================= FRIEND SECTIONS (rendered by JS) ================= -->
+  <main id="friends"></main>
+
+  <footer class="border-t border-white/10 py-10 text-center text-sm text-neutral-500">
+    Made with questionable decisions. Sangat forever.
+  </footer>
+
+  <script>
+    /* =====================================================
+       1. EDIT YOUR FRIENDS HERE
+       - id:     section ID (nav links scroll to #id)
+       - name:   shown in nav + heading
+       - image:  exact filename + extension (jpg / jpeg / webp)
+       - bio:    the roast / inside jokes
+       - titles: lines the typewriter cycles through
+       - colors: [accentA, accentB] for glow + gradient
+       ===================================================== */
+const FRIENDS = [
+  {
+    id: 'azhan',
+    name: 'Muhammad Azhan',
+    image: 'Muhammad Azhan.jpeg',
+    bio: 'Sangatiyon ka sangati, bhai chary ki jaan Azhan khan',
+    titles: ['Bhai chara on top🔝', 'Bara Sangati 🏆', 'Certified Topi Baaz 🧢'],
+    colors: ['#a855f7', '#ec4899']
+  },
+  {
+    id: 'ahsan',
+    name: 'Ahsan Abbas',
+    image: 'Ahsan Abbas.jpeg',
+    bio: 'WhatsApp group mein sirf tab zinda hota hai jab is ka dil kary. Udhaar le kar aise bhoolta hai jaise pichle janam ki baat ho.',
+    titles: ['Udhaar Le Kar Ghayab Hone Wala 👻', 'Muft Khore Ka Sardar 🍔', 'Group Chat Ka Khufia Agent 🕵️‍♂️'],
+    colors: ['#22d3ee', '#a855f7']
+  },
+  {
+    id: 'ali',
+    name: 'Ali Madni',
+    image: 'Ali Madni.jpeg',
+    bio: 'Is ki shakal par mat jana shakal sy bhola hai magr asal mein ye Drugs ka karobar karta hai.',
+    titles: ['Plan Bana Kar Dhoka Dene Wala 🏃‍♂️', 'Shareef Banne Ki Nakam Koshish 😇', 'Full Time Drama Queen 🎭'],
+    colors: ['#ec4899', '#22d3ee']
+  },
+  {
+    id: 'asad',
+    name: 'Asad Khan',
+    image: 'Asad Khan.jpg',
+    bio: 'Duniya ka sab sy wela insaan.Gruop mein 24ghnty online rehta hai. Zindagi mein koi kaam seedha nahi karta, lekin doosron ko gyaan aise deta hai jaise khud Einstein ka chacha ho.',
+    titles: ['Muft Ke Mashwaron Ka Badshah 🧠', 'All time Wela', 'Har Kaam Ulta Karne Wala 🔄'],
+    colors: ['#f59e0b', '#ef4444']
+  },
+  {
+    id: 'naveed',
+    name: 'Naveed Ahmed',
+    image: 'Naveed Ahmed.jpeg',
+    bio: 'Raat ke 3 baje bhi online milega lekin subah kaam ke waqt iski rooh jism se nikal chuki hoti hai. Apni har ghalti ka ilzaam qismat aur internet par daal deta hai.',
+    titles: ['Shano ka Ashiq❤️‍🔥', 'Har Waqt Sone Ka World Champion 😴', 'Bahane Bananay Ka Professor 📚'],
+    colors: ['#10b981', '#3b82f6']
+  },
+  {
+    id: 'subhan',
+    name: 'Subhan Joiya',
+    image: 'Subhan joiya.jpg',
+    bio: 'Iske paas har masle ka ek aisa "desi jugaad" hota hai jis ke baad masla pehle se double ho jata hai. Agar group mein koi kaand ho jaye to samajh jao peeche isi ka haath hai.',
+    titles: ['Har Kaand Ka Mastermind 😈', 'Desi Jugaad Ka Engineer 🛠️', 'Aag Lagane Aur Tamasha Dekhne Wala 🔥' , 'Sab sy bara Londy bazz ☠️'],
+    colors: ['#8b5cf6', '#06b6d4']
+  },
+  {
+    id: 'umair',
+    name: 'Umair Iqbal',
+    image: 'Umair Iqbal.webp',
+    bio: '500 larkiyon ka role model ho kar bhi is mein akar nhi hai. Kisi bhi normal baat ko overacting karke Bollywood movie bana deta hai. Haramiyon ki aik nishani hoti hai bina parhy top karty hain or insy qasam uthawalo phir bhi nhi btayeingy kab parhai karty hain.',
+    titles: ['500 larkiyon ky khwabon ka shezada', 'Overacting Ka Oscar Winner 🏆', 'Roast Karne Ki Chalti Phirti Machine 🎤', "No.1 Harami dost 🏆"],
+    colors: ['#f43f5e', '#f59e0b']
+  }
+];
+
+
+
+    /* ---------- 2. Build nav + sections from FRIENDS ---------- */
+    const $ = (s, el = document) => el.querySelector(s);
+    const navLinks = $('#navLinks'), mobileMenu = $('#mobileMenu'), friendsEl = $('#friends');
+    const initials = n => n.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+
+    FRIENDS.forEach((f, i) => {
+      // Nav buttons (desktop + mobile)
+      navLinks.insertAdjacentHTML('beforeend',
+        `<li><a href="#${f.id}" data-link="${f.id}" class="rounded-lg px-3 py-2 text-sm text-neutral-300 transition hover:bg-white/10 hover:text-white">${f.name}</a></li>`);
+      mobileMenu.insertAdjacentHTML('beforeend',
+        `<li><a href="#${f.id}" class="block rounded-lg px-3 py-3 text-neutral-200 hover:bg-white/10">${f.name}</a></li>`);
+
+      // Alternate layout on desktop (odd friends flip)
+      const flip = i % 2 ? 'md:flex-row-reverse' : 'md:flex-row';
+      friendsEl.insertAdjacentHTML('beforeend', `
+        <section id="${f.id}" class="relative mx-auto max-w-6xl px-5 py-16 sm:px-6 md:py-24" style="--a:${f.colors[0]};--b:${f.colors[1]}">
+          <div class="flex flex-col items-center gap-8 md:gap-14 ${flip}">
+
+            <!-- Photo -->
+            <div class="reveal w-full max-w-xs shrink-0 sm:max-w-sm md:w-5/12" style="perspective:900px">
+              <div class="tilt frame">
+                <div class="ph">
+                  <img src="${f.image}" alt="${f.name}" loading="lazy"
+                       onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'grid h-full w-full place-items-center font-display text-7xl font-bold text-white/30',textContent:'${initials(f.name)}'}))" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Text card -->
+            <div class="reveal d1 glass w-full rounded-3xl p-6 sm:p-8 md:w-7/12">
+              <span class="grad-bg inline-block rounded-full px-3 py-1 text-xs font-medium text-white">Sangat member</span>
+              <h2 class="font-display mt-4 text-3xl font-bold text-white sm:text-5xl">${f.name}</h2>
+              <p class="font-display mt-3 min-h-[2.5rem] text-xl grad-text sm:min-h-[2rem] sm:text-2xl" aria-live="off">
+                <span class="typed"></span><span class="cursor" aria-hidden="true"></span>
+              </p>
+              <p class="reveal d2 mt-5 leading-relaxed text-neutral-400">${f.bio}</p>
+            </div>
+          </div>
+        </section>`);
+    });
+
+    /* ---------- 3. Mobile menu toggle ---------- */
+    const menuBtn = $('#menuBtn');
+    function setMenu(open) {
+      mobileMenu.classList.toggle('hidden', !open);
+      mobileMenu.classList.toggle('flex', open);
+      $('#icoOpen').classList.toggle('hidden', open);
+      $('#icoClose').classList.toggle('hidden', !open);
+      menuBtn.setAttribute('aria-expanded', open);
+    }
+    menuBtn.addEventListener('click', () => setMenu(mobileMenu.classList.contains('hidden')));
+    mobileMenu.addEventListener('click', e => { if (e.target.closest('a')) setMenu(false); });
+
+    /* ---------- 4. Hero button -> first friend ---------- */
+    $('#heroBtn').addEventListener('click', e => {
+      e.preventDefault();
+      document.getElementById(FRIENDS[0].id)?.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    /* ---------- 5. Scroll progress bar (0% -> 100%) ---------- */
+    const bar = $('#progress');
+    function updateProgress() {
+      const max = document.documentElement.scrollHeight - innerHeight;
+      bar.style.width = (max > 0 ? Math.min(100, (scrollY / max) * 100) : 0) + '%';
+    }
+    addEventListener('scroll', updateProgress, { passive: true });
+    addEventListener('resize', updateProgress);
+    updateProgress();
+
+    /* ---------- 6. Reveal on scroll (Intersection Observer) ---------- */
+    const revealIO = new IntersectionObserver((entries) => {
+      entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('in'); revealIO.unobserve(en.target); } });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach(el => revealIO.observe(el));
+
+    /* ---------- 7. Typewriter: starts when the section is in view, pauses when it leaves ---------- */
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function typewriter(el, lines) {
+      let line = 0, chars = 0, deleting = false, timer = null;
+      if (reduceMotion) { el.textContent = lines[0]; return { start() {}, stop() {} }; }
+
+      function tick() {
+        const text = lines[line];
+        chars += deleting ? -1 : 1;
+        el.textContent = text.slice(0, chars);
+        let delay = deleting ? 35 : 70;
+        if (!deleting && chars === text.length) { deleting = true; delay = 1600; }          // pause after typing
+        else if (deleting && chars === 0) { deleting = false; line = (line + 1) % lines.length; delay = 350; }
+        timer = setTimeout(tick, delay);
+      }
+      return { start() { if (!timer) tick(); }, stop() { clearTimeout(timer); timer = null; } };
+    }
+
+    const typers = new Map();
+    FRIENDS.forEach(f => {
+      const sec = document.getElementById(f.id);
+      typers.set(sec, typewriter($('.typed', sec), f.titles));
+    });
+    const typeIO = new IntersectionObserver((entries) => {
+      entries.forEach(en => { const t = typers.get(en.target); en.isIntersecting ? t.start() : t.stop(); });
+    }, { threshold: 0.3 });
+    typers.forEach((_, sec) => typeIO.observe(sec));
+
+    /* ---------- 8. 3D tilt on photo cards (mouse + touch) ---------- */
+    document.querySelectorAll('.tilt').forEach(card => {
+      const move = e => {
+        const p = e.touches ? e.touches[0] : e;
+        const r = card.getBoundingClientRect();
+        const x = (p.clientX - r.left) / r.width - .5, y = (p.clientY - r.top) / r.height - .5;
+        card.style.transform = `rotateY(${x * 14}deg) rotateX(${-y * 14}deg) scale(1.02)`;
+      };
+      const reset = () => card.style.transform = '';
+      if (!reduceMotion) {
+        card.addEventListener('mousemove', move);
+        card.addEventListener('touchmove', move, { passive: true });
+        ['mouseleave', 'touchend'].forEach(ev => card.addEventListener(ev, reset));
+      }
+    });
+
+    /* ---------- 9. Highlight active friend in navbar ---------- */
+    const activeIO = new IntersectionObserver((entries) => {
+      entries.forEach(en => {
+        if (!en.isIntersecting) return;
+        document.querySelectorAll('[data-link]').forEach(a => {
+          const on = a.dataset.link === en.target.id;
+          a.classList.toggle('bg-white/10', on);
+          a.classList.toggle('text-white', on);
+        });
+      });
+    }, { rootMargin: '-45% 0px -45% 0px' });
+    FRIENDS.forEach(f => activeIO.observe(document.getElementById(f.id)));
+  </script>
+</body>
+</html>
